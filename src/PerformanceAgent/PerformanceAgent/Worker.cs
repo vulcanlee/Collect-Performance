@@ -1,25 +1,27 @@
+using Microsoft.Extensions.Options;
 using PerformanceAgent.Models;
+using PerformanceAgent.Services;
 
 namespace PerformanceAgent
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly PerformanceService performanceService;
+        private readonly IOptions<PerformanceConfiguration> options;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger,
+            PerformanceService performanceService,
+            IOptions<PerformanceConfiguration> options)
         {
             _logger = logger;
+            this.performanceService = performanceService;
+            this.options = options;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
-
-                new PerformanceModel().GetAllCategory("");
-            }
+            performanceService.ListAllCounters();
         }
     }
 }
