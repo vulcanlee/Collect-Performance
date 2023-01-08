@@ -21,7 +21,10 @@ namespace PerformanceAgent
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            performanceService.ListAllCounters();
+            await Task.Delay(1500);
+            performanceService.ListAllCounters(options.Value);
+
+            Environment.Exit(0);
         }
     }
 }

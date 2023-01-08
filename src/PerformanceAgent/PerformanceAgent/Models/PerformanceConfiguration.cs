@@ -9,5 +9,6 @@ namespace PerformanceAgent.Models
     public class PerformanceConfiguration
     {
         public string Action { get; set; }
+        public bool ListAllCounterToFile { get; set; }
     }
 }

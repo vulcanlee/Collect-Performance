@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PerformanceAgent.Helpers;
+using PerformanceAgent.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +11,18 @@ namespace PerformanceAgent.Services
 {
     public class PerformanceService
     {
+        private readonly OutputFileHelper outputFileHelper;
+        private readonly ConsoleHelper consoleHelper;
+        private readonly MagicObject magicObject;
+
+        public PerformanceService(OutputFileHelper outputFileHelper,
+            ConsoleHelper consoleHelper, MagicObject magicObject)
+        {
+            this.outputFileHelper = outputFileHelper;
+            this.consoleHelper = consoleHelper;
+            this.magicObject = magicObject;
+        }
+
         #region 效能監視器基本 API
         public List<PerformanceCounterCategory> GetAllCategory(string machineName)
         {
@@ -100,7 +114,24 @@ namespace PerformanceAgent.Services
         #endregion
 
         #region 效能監視器要執行的動作
-        public void ListAllCounters()
+        public void ListAllCounters(PerformanceConfiguration configuration)
+        {
+            if (configuration.ListAllCounterToFile)
+            {
+                string filename = outputFileHelper
+                    .PrepareOutputFile(MagicObject.AllCounterWriteFolderName,
+                    $"Counters.txt");
+                var stream = consoleHelper.SetConsoleOutputToFile(filename);
+
+                ListAllCountersToConsole(configuration);
+
+                consoleHelper.ResetConsoleOutput(stream);
+            }
+
+            ListAllCountersToConsole(configuration);
+        }
+
+        public void ListAllCountersToConsole(PerformanceConfiguration configuration)
         {
             var allCatetories = GetAllCategory("");
             foreach (var category in allCatetories)
@@ -127,7 +158,7 @@ namespace PerformanceAgent.Services
                 }
                 Console.WriteLine();
             }
-            #endregion
         }
+        #endregion
     }
 }
