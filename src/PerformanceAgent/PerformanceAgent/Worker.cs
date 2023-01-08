@@ -1,3 +1,5 @@
+using PerformanceAgent.Models;
+
 namespace PerformanceAgent
 {
     public class Worker : BackgroundService
@@ -15,6 +17,8 @@ namespace PerformanceAgent
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(1000, stoppingToken);
+
+                new PerformanceModel().GetAllCategory("");
             }
         }
     }
