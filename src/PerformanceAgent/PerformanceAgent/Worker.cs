@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using PerformanceAgent.Helpers;
 using PerformanceAgent.Models;
 using PerformanceAgent.Services;
 
@@ -22,7 +23,10 @@ namespace PerformanceAgent
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Delay(1500);
-            performanceService.ListAllCounters(options.Value);
+
+            options.Value.Prepare();
+
+            performanceService.CollectPerformance(options.Value);
 
             Environment.Exit(0);
         }

@@ -14,7 +14,8 @@ namespace PerformanceAgent.Services
         private readonly OutputFileHelper outputFileHelper;
         private readonly ConsoleHelper consoleHelper;
         private readonly MagicObject magicObject;
-
+        PerformanceConfiguration configuration;
+        PerformanceModel performanceModel;
         public PerformanceService(OutputFileHelper outputFileHelper,
             ConsoleHelper consoleHelper, MagicObject magicObject)
         {
@@ -83,13 +84,13 @@ namespace PerformanceAgent.Services
             if (string.IsNullOrEmpty(instanceName))
             {
                 var result = new PerformanceCounter(CategoryName,
-                    CounterName, instanceName);
+                    CounterName);
                 return result;
             }
             else
             {
                 var result = new PerformanceCounter(CategoryName,
-                    CounterName);
+                    CounterName, instanceName);
                 return result;
             }
         }
@@ -114,7 +115,54 @@ namespace PerformanceAgent.Services
         #endregion
 
         #region 效能監視器要執行的動作
-        public void ListAllCounters(PerformanceConfiguration configuration)
+        public async void CollectPerformance(PerformanceConfiguration configuration)
+        {
+            this.configuration = configuration;
+            performanceModel = new PerformanceModel();
+
+            if (configuration.Action == MagicObject.PerformanceActionListAllCounter)
+            {
+                ListAllCounters();
+            }
+            else
+            {
+                CollectionPerformance();
+            }
+        }
+
+        void CollectionPerformance()
+        {
+            #region 建立效能計數器物件集合
+            foreach (var counterConfiguration in configuration.Counters)
+            {
+                var counter = GetPerformanceCounter(counterConfiguration.Category,
+                    counterConfiguration.Counter, counterConfiguration.Instance);
+                performanceModel.Counters.Add(counter);
+            }
+            #endregion
+
+            #region 列出效能數據
+            performanceModel.FirstReadValue();
+            Console.WriteLine($"稍後一下");
+            Thread.Sleep(1500);
+            Console.WriteLine($"顯示現在效能");
+
+            for (int i = 0; i < 50; i++)
+            {
+                performanceModel.RefreshPerformance();
+                foreach (var item in performanceModel.Items)
+                {
+                    Console.Write(item.GetPerformancePath()+"  ");
+                    consoleHelper.Output($"{item.Value}", ConsoleColor.Black, ConsoleColor.Yellow);
+                    Console.WriteLine();
+                }
+                Thread.Sleep(2000);
+                Console.WriteLine();
+            }
+            #endregion
+        }
+
+        void ListAllCounters()
         {
             if (configuration.ListAllCounterToFile)
             {
@@ -123,15 +171,15 @@ namespace PerformanceAgent.Services
                     $"Counters.txt");
                 var stream = consoleHelper.SetConsoleOutputToFile(filename);
 
-                ListAllCountersToConsole(configuration);
+                ListAllCountersToConsole();
 
                 consoleHelper.ResetConsoleOutput(stream);
             }
 
-            ListAllCountersToConsole(configuration);
+            ListAllCountersToConsole();
         }
 
-        public void ListAllCountersToConsole(PerformanceConfiguration configuration)
+        void ListAllCountersToConsole()
         {
             var allCatetories = GetAllCategory("");
             foreach (var category in allCatetories)
