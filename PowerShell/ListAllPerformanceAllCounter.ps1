@@ -1,0 +1,1 @@
+(Get-Counter -ListSet *)| Sort-Object -Property CounterSetName | ForEach-Object {$_.Paths} 
