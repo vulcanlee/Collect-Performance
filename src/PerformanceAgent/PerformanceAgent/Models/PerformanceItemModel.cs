@@ -9,6 +9,7 @@ namespace PerformanceAgent.Models
 {
     public class PerformanceItemModel
     {
+        public string MachineName { get; set; } = "";
         public string Category { get; set; } = "";
         public string Counter { get; set; } = "";
         public string Instance { get; set; } = "";

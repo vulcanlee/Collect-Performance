@@ -18,5 +18,6 @@ namespace PerformanceAgent.Models
         public string Category { get; set; } = "";
         public string Counter { get; set; } = "";
         public string Instance { get; set; } = "";
+        public string MachineName { get; set; } = "";
     }
 }
